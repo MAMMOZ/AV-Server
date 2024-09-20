@@ -4,7 +4,7 @@ import time
 with open('cookie.txt', 'r') as file:
     cookies = [line.strip() for line in file.readlines()]
 
-url = 'http://localhost:3000/key'
+url = 'https://cm150lytp0000mnbs5qitvejv.iservkmitl.tech/key'
 for cookie in cookies:
     # print(cookie)
     data = {

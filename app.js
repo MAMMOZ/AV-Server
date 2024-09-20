@@ -14,6 +14,8 @@ mongoose.connect('mongodb://clm7cqub1001qbsmn1nj4ctpv:lFTpO2CZrft9yz3bNGYduxc9@1
 // สร้าง Schema สำหรับข้อมูล key
 const cookieSchema = new mongoose.Schema({
     key: String,
+    user: String,
+    password: String,
     cookie: String,
     status: { type: Number, default: 0 }
 });
@@ -24,7 +26,7 @@ const Cookie = mongoose.model('Cookie', cookieSchema);
 // POST /key - เพิ่มข้อมูลใหม่
 app.post('/key', async (req, res) => {
     try {
-        const { key, cookie } = req.body;
+        const { key, user, password, cookie } = req.body;
         
         if (!key || !cookie) {
             return res.status(400).send('Key and cookie are required');
@@ -36,7 +38,7 @@ app.post('/key', async (req, res) => {
             return res.status(404).send("same cookie");
         }
 
-        const newCookie = new Cookie({ key, cookie, status: 0 });
+        const newCookie = new Cookie({ key, user, password, cookie, status: 0 });
         await newCookie.save();
         
         res.status(201).send(newCookie);
