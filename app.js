@@ -78,6 +78,26 @@ app.post('/make', async (req, res) => {
     }
 });
 
+app.get('/seto', async (req, res) => {
+    try {
+        // ดึงข้อมูลจาก MongoDB
+        const cookies = await Cookie.find({ key: "abc123", status: 0 });
+
+        // อัปเดตสถานะของเอกสารแต่ละรายการเป็น 0
+        for (const cookie of cookies) {
+            await Cookie.updateOne({ _id: cookie._id }, { $set: { status: 0 } });
+        }
+
+        console.log(cookies.length);
+
+        // ส่งจำนวน cookie ที่พบกลับไป
+        return res.send("Cookie : " + cookies.length);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
+
 app.get('/', async (req, res) => {
     try {
         const newCookie = await Cookie.find({ key:"abc123", status: 0 });
