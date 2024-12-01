@@ -47,34 +47,35 @@ app.post('/key', async (req, res) => {
     }
 });
 
+const { Mutex } = require('async-mutex');
+const mutex = new Mutex();
+
 // GET /key - รับข้อมูลตาม key ที่ระบุ
 app.post('/make', async (req, res) => {
+    const { key } = req.body;
+
+    if (!key) {
+        return res.status(400).send('Key is required');
+    }
+
+    const release = await mutex.acquire(); // ล็อกเริ่มต้น
     try {
-        const { key } = req.body;
-
-        if (!key) {
-            return res.status(400).send('Key is required');
-        }
-
-        const foundCookie = await Cookie.findOne({ key, status:0 });
-        
-        if (!foundCookie) {
-            return res.status(404).send('Key not found');
-        }
-
+        // ค้นหาและอัปเดตสถานะ
         const updatedCookie = await Cookie.findOneAndUpdate(
-            { _id: foundCookie._id },
-            { status: 1 },
+            { key, status: 0 },
+            { $set: { status: 1 } },
             { new: true }
         );
 
         if (!updatedCookie) {
-            return res.status(404).send('Key not found updatedCookie');
+            return res.status(404).send('Key not found or already updated');
         }
 
-        res.status(200).send(foundCookie);
+        res.status(200).send(updatedCookie);
     } catch (error) {
         res.status(500).send(error.message);
+    } finally {
+        release(); // ปลดล็อกเมื่อสิ้นสุด
     }
 });
 
