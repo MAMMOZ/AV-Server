@@ -98,6 +98,22 @@ app.get('/seto', async (req, res) => {
     }
 });
 
+app.get('/deleall', async (req, res) => {
+    try {
+        // ดึงข้อมูลจาก MongoDB
+        const cookies = await Cookie.find({ key: "abc123" });
+
+        await Cookie.deleteMany({ key: "abc123" });
+
+        console.log(`จำนวน Cookies ที่ลบ: ${cookies.length}`);
+
+        // ส่งจำนวน cookies ที่ลบกลับไป
+        return res.send("จำนวน Cookies ที่ลบ: " + cookies.length);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
 
 app.get('/', async (req, res) => {
     try {
