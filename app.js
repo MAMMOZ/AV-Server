@@ -100,37 +100,29 @@ app.get('/seto', async (req, res) => {
 
 app.get('/search-and-delete', async (req, res) => {
     try {
-        // ขั้นตอนที่ 1: ค้นหาเอกสารที่ตรงกับเงื่อนไข
-        const cookies = await Cookie.find({ key: "abc123" });
+        let deletedCount = 0;
 
-        if (cookies.length === 0) {
-            return res.send("ไม่พบข้อมูลที่ตรงกับเงื่อนไข");
+        while (true) {
+            // ดึงข้อมูลมาเป็นกลุ่มเล็ก ๆ
+            const batch = await Cookie.find({ key: "abc123" }).limit(100); // จำกัด 100 รายการต่อรอบ
+
+            if (batch.length === 0) break; // หากไม่มีข้อมูลแล้ว ให้หยุด
+
+            // ลบข้อมูลในกลุ่มที่ดึงมา
+            await Cookie.deleteMany({ _id: { $in: batch.map(doc => doc._id) } });
+
+            deletedCount += batch.length;
+            console.log(`ลบข้อมูล: ${batch.length} รายการ`);
         }
 
-        // ขั้นตอนที่ 2: รูปแบบข้อมูลที่ต้องการแสดง
-        const formattedData = cookies.map(cookie => ({
-            id: cookie._id,
-            key: cookie.key,
-            value: cookie.value, // ปรับตามโครงสร้างจริง
-        }));
-
-        console.log("ข้อมูลที่ค้นพบ:", formattedData);
-
-        // ขั้นตอนที่ 3: ลบเอกสารที่ค้นพบ
-        await Cookie.deleteMany({ key: "abc123" });
-
-        console.log(`ลบข้อมูลทั้งหมด: ${cookies.length} รายการ`);
-
-        // ส่งข้อมูลที่ค้นพบและจำนวนที่ลบกลับไปยังผู้ใช้
-        return res.json({
-            message: `ลบข้อมูลทั้งหมดสำเร็จ: ${cookies.length} รายการ`,
-            deletedData: formattedData,
-        });
+        console.log(`ลบข้อมูลทั้งหมด: ${deletedCount} รายการ`);
+        res.send(`ลบข้อมูลทั้งหมด: ${deletedCount} รายการ`);
     } catch (error) {
         console.error("เกิดข้อผิดพลาด:", error.message);
-        return res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
+        res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
     }
 });
+
 
 
 app.get('/', async (req, res) => {
