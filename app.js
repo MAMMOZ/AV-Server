@@ -98,19 +98,37 @@ app.get('/seto', async (req, res) => {
     }
 });
 
-app.get('/deleall', async (req, res) => {
+app.get('/search-and-delete', async (req, res) => {
     try {
-        // ดึงข้อมูลจาก MongoDB
+        // ขั้นตอนที่ 1: ค้นหาเอกสารที่ตรงกับเงื่อนไข
         const cookies = await Cookie.find({ key: "abc123" });
 
+        if (cookies.length === 0) {
+            return res.send("ไม่พบข้อมูลที่ตรงกับเงื่อนไข");
+        }
+
+        // ขั้นตอนที่ 2: รูปแบบข้อมูลที่ต้องการแสดง
+        const formattedData = cookies.map(cookie => ({
+            id: cookie._id,
+            key: cookie.key,
+            value: cookie.value, // ปรับตามโครงสร้างจริง
+        }));
+
+        console.log("ข้อมูลที่ค้นพบ:", formattedData);
+
+        // ขั้นตอนที่ 3: ลบเอกสารที่ค้นพบ
         await Cookie.deleteMany({ key: "abc123" });
 
-        console.log(`จำนวน Cookies ที่ลบ: ${cookies.length}`);
+        console.log(`ลบข้อมูลทั้งหมด: ${cookies.length} รายการ`);
 
-        // ส่งจำนวน cookies ที่ลบกลับไป
-        return res.send("จำนวน Cookies ที่ลบ: " + cookies.length);
+        // ส่งข้อมูลที่ค้นพบและจำนวนที่ลบกลับไปยังผู้ใช้
+        return res.json({
+            message: `ลบข้อมูลทั้งหมดสำเร็จ: ${cookies.length} รายการ`,
+            deletedData: formattedData,
+        });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error("เกิดข้อผิดพลาด:", error.message);
+        return res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
     }
 });
 
