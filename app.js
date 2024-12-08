@@ -131,8 +131,9 @@ app.get('/search-and-delete', async (req, res) => {
 app.get('/cookie', async (req, res) => {
     try {
         const newCookie = await Cookie.find({ key:"abc123", status: 0 });
-        console.log(newCookie.length);
-        return res.send(newCookie.length);
+        const cookieCount = Array.isArray(newCookie) ? newCookie.length : 0; // ตรวจสอบว่าผลลัพธ์เป็นอาเรย์
+        console.log(`Cookie count: ${cookieCount}`);
+        return res.send(cookieCount.toString());
     } catch (error) {
         res.status(500).send(error.message);
     }
