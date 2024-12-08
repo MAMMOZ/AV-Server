@@ -51,6 +51,8 @@
 
     <script>
       url = `https://cm150lytp0000mnbs5qitvejv.iservkmitl.tech`;
+      load()
+      setInterval(load, 5000);
       async function load() {
         try {
           const response = await fetch(`${url}/cookie`, {
