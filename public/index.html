@@ -10,6 +10,7 @@
     class="bg-black text-white min-h-screen flex items-center justify-center"
   >
     <div class="w-96 bg-gray-900 rounded-lg shadow-lg p-6">
+      <div id="statusMessage" class="mt-4 text-sm"></div>
       <h1 class="text-3xl font-bold mb-6 text-center">เดี๋ยวพรุ่งนี้ก็รวยแล้ว</h1>
       <h1 class="text-xl font-bold mb-6 text-center" id="cookie">
         Cookie : 1000
@@ -62,6 +63,12 @@
         }
       }
       async function sendRequest(endpoint) {
+        const confirmation = confirm("Are you sure ??");
+        if (!confirmation) {
+          // ถ้าผู้ใช้กดยกเลิก
+          document.getElementById("statusMessage").innerText = "cancelled.";
+          return;
+        }
         try {
           const response = await fetch(`${url}${endpoint}`, {
             method: "GET",
@@ -71,6 +78,7 @@
           });
           const result = await response.text();
           console.log(result);
+          document.getElementById("statusMessage").innerText = "successfully." + endpoint;
           alert(result);
         } catch (error) {
           alert("Error: " + error.message);
