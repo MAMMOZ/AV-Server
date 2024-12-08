@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buszyskyshop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-black text-white min-h-screen flex items-center justify-center"
+  >
+    <div class="w-96 bg-gray-900 rounded-lg shadow-lg p-6">
+      <h1 class="text-3xl font-bold mb-6 text-center">Buszyskyshop</h1>
+      <h1 class="text-xl font-bold mb-6 text-center" id="cookie">
+        Cookie : 1000
+      </h1>
+      <div class="space-y-4">
+        <textarea
+          id="inputData"
+          rows="10"
+          placeholder="Enter Cookie Roblox here..."
+          class="w-full px-4 py-2 border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        ></textarea>
+        <button
+          onclick="load()"
+          class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          load
+        </button>
+        <button
+          onclick="processCookies()"
+          class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          Add Data
+        </button>
+        <button
+          onclick="sendRequest('/search-and-delete')"
+          class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+        >
+          Clear All Data
+        </button>
+        <button
+          onclick="sendRequest('/set0')"
+          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          Set All to 0
+        </button>
+      </div>
+      <div id="output" class="mt-4 text-sm"></div>
+    </div>
+
+    <script>
+      url = `https://cm150lytp0000mnbs5qitvejv.iservkmitl.tech`;
+      async function load() {
+        try {
+          const response = await fetch(`${url}/cookie`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const result = await response.text();
+          document.getElementById("cookie").innerHTML = "Cookie : " + result;
+        } catch (error) {
+          console.log(error.message);
+        }
+      }
+      async function sendRequest(endpoint) {
+        try {
+          const response = await fetch(`${url}${endpoint}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const result = await response.text();
+          console.log(result);
+          alert(result);
+        } catch (error) {
+          alert("Error: " + error.message);
+          console.log(error.message);
+        }
+      }
+      async function processCookies() {
+        const input = document.getElementById("inputData").value;
+        const cookies = input
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        if (cookies.length === 0) {
+          alert("No cookies to process.");
+          return;
+        }
+
+        const results = [];
+
+        for (const cookie of cookies) {
+          const data = {
+            key: "abc123",
+            cookie: cookie,
+          };
+
+          try {
+            const response = await fetch(`${url}/key`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+              const res = await response.json();
+              results.push(
+                `Cookie: ${cookie} => Success: ${JSON.stringify(res)}`
+              );
+            } else {
+              const errorMsg = await response.text();
+              results.push(`Cookie: ${cookie} => Failed: ${errorMsg}`);
+            }
+          } catch (error) {
+            results.push(`Cookie: ${cookie} => Error: ${error.message}`);
+          }
+        }
+
+        document.getElementById("output").innerHTML = results.join("<br>");
+      }
+    </script>
+  </body>
+</html>

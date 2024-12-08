@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
+app.use(express.json({ limit: '10mb' }));
 // Middleware for parsing request body
 app.use(bodyParser.json());
 
@@ -22,6 +23,8 @@ const cookieSchema = new mongoose.Schema({
 
 // สร้างโมเดล (Model) จาก Schema
 const Cookie = mongoose.model('Cookie', cookieSchema);
+
+app.use(express.static("public"));
 
 // POST /key - เพิ่มข้อมูลใหม่
 app.post('/key', async (req, res) => {
@@ -125,14 +128,18 @@ app.get('/search-and-delete', async (req, res) => {
 
 
 
-app.get('/', async (req, res) => {
+app.get('/cookie', async (req, res) => {
     try {
         const newCookie = await Cookie.find({ key:"abc123", status: 0 });
         console.log(newCookie.length);
-        return res.send("Cookie : "+newCookie.length);
+        return res.send(newCookie.length);
     } catch (error) {
         res.status(500).send(error.message);
     }
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html");
 });
 
 // เริ่มเซิร์ฟเวอร์
